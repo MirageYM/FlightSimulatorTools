@@ -516,12 +516,66 @@ class CDU747( QtGui.QLabel ):
 			elif( i >= 27 and i < 38 ):
 				#Number Keys
 				rectSetBitmap( i, p, 32, 32, self.clickPosBitmap )
-	
+
+	def keyPressEvent( self, ev ):
+
+		#print ev.key()
+		
+		idx = -1
+		if( ev.key() >= 49 and ev.key() <= 57 ):
+			#Number 1-9
+			idx = ev.key() - 22
+		elif( ev.key() == 48 ):
+			#Number 0
+			idx = 37
+		elif( ev.key() == 46 ):
+			#Number dot
+			idx = 36
+		elif( ev.key() == 46 ):
+			#Number +
+			idx = 38
+		elif( ev.key() >= 65 and ev.key() <= 90 ):
+			#Alpha
+			idx = ev.key() - 26
+		elif( ev.key() == 32 ):
+			#Space
+			idx = 65
+		elif( ev.key() == 16777223 ):
+			#Del
+			idx = 66
+		elif( ev.key() == 47 ):
+			#/
+			idx = 67
+		elif( ev.key() == 16777219 ):
+			#CLR (BackSpace)
+			idx = 68
+		elif( ev.key() >= 16777264 and ev.key() <= 16777275 ):
+			if( ev.nativeModifiers() == 512 ):
+				#F1-F12( CDU L1-L6/R1-R6 )
+				idx = ev.key() - 16777264
+			elif( ev.nativeModifiers() == 513 ):
+				#SHIFT+F1-F12( INIT_REF - PROG, MENU - NAV_RAD)
+				idx = ev.key() - 16777264 + 12
+				if( idx >= 22 ):
+					idx += 1
+					
+		elif( ev.key() == 16777220 ):
+			#ENTER (EXEC)
+			idx = 22
+				
+		elif( ev.key() >= 16777238 and ev.key() <= 16777239 ):
+			#PGUP/DN
+			idx = ev.key() - 16777238 + 25
+
+			
+		if( idx >= 0 and self.sock ):
+			self.sock.send( self.setting.targetCDU + ':' + str( idx ) )
+			
 	def mouseReleaseEvent( self, ev ):
 		try:
 			idx = self.clickPosBitmap[ev.pos().x()][ev.pos().y()]
 
-			if( idx >= 0 ):
+			if( idx >= 0 and self.sock ):
 				self.sock.send( self.setting.targetCDU + ':' + str( idx ) )
 				
 				geom = self.geometry()
